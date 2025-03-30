@@ -26,9 +26,8 @@ cd "$workdir/${src_dir_inside}" && \
     --enable-version3 \
     --enable-static \
     --enable-pic \
-    --enable-librtmp \
-    --extra-cflags="-fPIC -mmacosx-version-min=14.0 -I$rtmp_dir/include" \
-    --extra-ldflags="-fPIC -mmacosx-version-min=14.0 -L$rtmp_dir/lib" && \
+    --extra-cflags="-fPIC -mmacosx-version-min=14.0" \
+    --extra-ldflags="-fPIC -mmacosx-version-min=14.0" && \
 make -j12 && make install
 
 
