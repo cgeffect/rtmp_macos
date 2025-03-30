@@ -1,0 +1,14 @@
+prefix=/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/3rdparty/ffmpeg/deploy/
+exec_prefix=${prefix}
+libdir=/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/3rdparty/ffmpeg/deploy//lib
+includedir=/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/3rdparty/ffmpeg/deploy//include
+
+Name: libavformat
+Description: FFmpeg container format library
+Version: 60.16.100
+Requires: libavcodec >= 60.31.102, libswresample >= 4.12.100, libavutil >= 58.29.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavformat -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -L/usr/local/Cellar/rtmpdump/2.4-20151223_3/lib -lrtmp -lz -L/usr/local/Cellar/openssl@3/3.4.1/lib -lssl -lcrypto
+Libs.private: 
+Cflags: -I${includedir}

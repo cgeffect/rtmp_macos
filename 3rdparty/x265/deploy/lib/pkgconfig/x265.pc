@@ -1,0 +1,11 @@
+prefix=/Users/jason/Jason/mogic/Mac/HAVMedia/framework/third_party/x265/deploy
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: x265
+Description: H.265/HEVC video encoder
+Version: 4.1
+Libs: -L${libdir} -lx265
+Libs.private: -ldl
+Cflags: -I${includedir}
