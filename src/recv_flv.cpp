@@ -1,6 +1,10 @@
 // LibrtmpVS2015RecvStream.cpp : ??????????ó????????
 //
 
+//最简单的基于librtmp的示例：接收（RTMP保存为FLV）
+//                        
+//原文链接：https://blog.csdn.net/leixiaohua1020/article/details/42104893
+
 #include "rtmp.h"
 #include "log.h"
 #include <stdio.h>
@@ -39,12 +43,15 @@ int main() {
     // is live stream ?
     bool bLiveStream = true;
 
-    int bufsize = 1024 * 1024 * 10;
+    int bufsize = 1024;
     char *buf = (char *)malloc(bufsize);
     memset(buf, 0, bufsize);
     long countbufsize = 0;
 
-    FILE *fp = fopen("d:\\_movies\\ande10222.flv", "wb");
+    char *inUrl = (char *)"/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/recv.flv";
+    char *outUrl = (char *)"rtmp://172.16.184.26:1935/live/test";
+
+    FILE *fp = fopen(inUrl, "wb");
     if (!fp) {
         RTMP_LogPrintf("Open File Error.\n");
         CleanupSockets();
@@ -56,7 +63,7 @@ int main() {
     // set connection timeout,default 30s
     rtmp->Link.timeout = 10;
     // HKS's live URL
-    if (!RTMP_SetupURL(rtmp, "rtmp://192.168.1.9/live/test")) {
+    if (!RTMP_SetupURL(rtmp, outUrl)) {
         RTMP_Log(RTMP_LOGERROR, "SetupURL Err\n");
         RTMP_Free(rtmp);
         CleanupSockets();
@@ -84,9 +91,17 @@ int main() {
         return -1;
     }
 
-    while (nRead = RTMP_Read(rtmp, buf, bufsize)) {
+    while (true) {
+        int nRead = RTMP_Read(rtmp, buf, bufsize);
+        if (nRead <= 0) {
+            printf("error !!!\n");
+            continue;
+        }
+        for (int i = 0; i < bufsize; i++) {
+            printf("%02x ", buf[i]);
+        }
+        printf("\n");
         fwrite(buf, 1, nRead, fp);
-
         countbufsize += nRead;
         RTMP_LogPrintf("Receive: %5dByte, Total: %5.2fkB\n", nRead, countbufsize * 1.0 / 1024);
     }
@@ -106,3 +121,13 @@ int main() {
     getchar();
     return 0;
 }
+
+/*
+ffmpeg -re -i ./doc/source.flv -c copy -f flv -y rtmp://172.16.184.26:1935/live/livestream
+拉流 rtmp
+ffplay rtmp://172.16.184.26:1935/live/livestream
+
+拉流 flv
+ffplay http://172.16.184.26:8080/live/livestream.flv
+
+*/

@@ -72,6 +72,10 @@ void CleanupSockets() {
 #endif
 }
 
+char *inUrl = (char *)"/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/sintel.flv";
+// 输出的地址
+char *outUrl = (char *)"rtmp://172.16.184.26:1935/live/test";
+
 // Publish using RTMP_SendPacket()
 int publish_using_packet() {
     RTMP *rtmp = NULL;
@@ -91,7 +95,7 @@ int publish_using_packet() {
     uint32_t streamid = 0;
 
     FILE *fp = NULL;
-    fp = fopen("test2.flv", "rb");
+    fp = fopen(inUrl, "rb");
     if (!fp) {
         RTMP_LogPrintf("Open File Error.\n");
         CleanupSockets();
@@ -111,7 +115,7 @@ int publish_using_packet() {
     RTMP_Init(rtmp);
     // set connection timeout,default 30s
     rtmp->Link.timeout = 5;
-    if (!RTMP_SetupURL(rtmp, "rtmp://192.168.1.9/live/test1")) {
+    if (!RTMP_SetupURL(rtmp, outUrl)) {
         RTMP_Log(RTMP_LOGERROR, "SetupURL Err\n");
         RTMP_Free(rtmp);
         CleanupSockets();
@@ -187,7 +191,7 @@ int publish_using_packet() {
             RTMP_Log(RTMP_LOGERROR, "Send Error\n");
             break;
         }
-        msleep(33); // manually,ffmpeg.api
+        msleep(15); // manually,ffmpeg.api
 
         if (!ReadU32(&preTagsize, fp))
             break;
@@ -246,7 +250,7 @@ int publish_using_write() {
     RTMP *rtmp = NULL;
 
     FILE *fp = NULL;
-    fp = fopen("test2.flv", "rb");
+    fp = fopen(inUrl, "rb");
     if (!fp) {
         RTMP_LogPrintf("Open File Error.\n");
         CleanupSockets();
@@ -266,7 +270,7 @@ int publish_using_write() {
     RTMP_Init(rtmp);
     // set connection timeout,default 30s
     rtmp->Link.timeout = 5;
-    if (!RTMP_SetupURL(rtmp, "rtmp://localhost/live/test1")) {
+    if (!RTMP_SetupURL(rtmp, outUrl)) {
         RTMP_Log(RTMP_LOGERROR, "SetupURL Err\n");
         RTMP_Free(rtmp);
         CleanupSockets();
@@ -323,7 +327,7 @@ int publish_using_write() {
             RTMP_Log(RTMP_LOGERROR, "Rtmp Write Error\n");
             break;
         }
-        msleep(33);
+        msleep(15);
 
         free(pFileBuf);
         pFileBuf = NULL;

@@ -12,10 +12,10 @@ extern "C" {
 #include <iostream>
 using namespace std;
 
-#pragma comment(lib, "avformat.lib")
-#pragma comment(lib, "avutil.lib")
-#pragma comment(lib, "avcodec.lib")
-#pragma warning(disable : 4996)
+// #pragma comment(lib, "avformat.lib")
+// #pragma comment(lib, "avutil.lib")
+// #pragma comment(lib, "avcodec.lib")
+// #pragma warning(disable : 4996)
 /// 将敬告禁用 ;;;#pragma warning(disable: 4996)
 
 static int avError(int errNum) {
@@ -40,9 +40,9 @@ int main() {
     printf("hello, vs2015+ffmpeg=%ud\n", avfmtVersion);
 
     // 使用的相对路径，执行文件在bin目录下。test.mp4放到bin目录下即可
-    const char *inUrl = "d:\\_movies\\ande10.flv";
+    const char *inUrl = "/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/768x320.flv";
     // 输出的地址
-    const char *outUrl = "rtmp://192.168.1.9/live/test";
+    const char *outUrl = "rtmp://172.16.184.26:1935/live/test";
 
     AVFormatContext *ictx = NULL;
 
@@ -74,22 +74,6 @@ int main() {
         return avError(ret);
     }
     cout << "avformat_alloc_output_context2 success!" << endl;
-
-    // //遍历输入的AVStream，并且创建对应的输出流
-    // for (int i = 0; i < ictx->nb_streams; i++) {
-    // 	//创建一个新的流到octx中
-    // 	AVStream *out = avformat_new_stream(octx,
-    // ictx->streams[i]->codec->codec); 	if (!out) { 		return
-    // avError(0);
-    // 	}
-
-    // 	//复制配置信息
-    // 	ret = avcodec_parameters_copy(out->codecpar,
-    // ictx->streams[i]->codecpar); 	if (ret < 0) { 		return
-    // avError(ret);
-    // 	}
-    // 	out->codec->codec_tag = 0;
-    // }
 
     // 遍历输入的 AVStream，并且创建对应的输出流
     for (int i = 0; i < ictx->nb_streams; i++) {

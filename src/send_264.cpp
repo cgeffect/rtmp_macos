@@ -16,10 +16,14 @@ int read_buffer1(unsigned char *buf, int buf_size) {
 }
 
 int main(int argc, char *argv[]) {
-    fp_send1 = fopen("test2.h264", "rb");
+    char *inUrl = (char *)"/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/test2.h264";
+    // 输出的地址
+    char *outUrl = (char *)"rtmp://172.16.184.26:1935/live/test";
+
+    fp_send1 = fopen(inUrl, "rb");
 
     // 初始化并连接到服务器
-    RTMP264_Connect("rtmp://localhost/live/test1");
+    RTMP264_Connect(outUrl);
 
     // 发送
     RTMP264_Send(read_buffer1);

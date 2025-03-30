@@ -37,7 +37,7 @@ file(GLOB_RECURSE SOURCES
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADERS} ${SOURCES})
 
-add_executable(rtmpApp ${HEADERS} ${SOURCES})
-set_target_properties(rtmpApp PROPERTIES MACOSX_BUNDLE TRUE)
-target_include_directories(rtmpApp PRIVATE ${libSRV_INCLUDES_DIR})
-target_link_libraries(rtmpApp PRIVATE ${libs_trd_srv} "-framework Cocoa")
+add_executable(rtmp ${HEADERS} ${SOURCES})
+set_target_properties(rtmp PROPERTIES MACOSX_BUNDLE TRUE)
+target_include_directories(rtmp PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(rtmp PRIVATE ${libs_trd_srv} "-framework Cocoa")
