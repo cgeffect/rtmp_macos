@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
+
 #ifdef WIN32
 #include <winsock2.h>
 #pragma comment(lib, "librtmpsrc.lib")
@@ -92,9 +94,11 @@ int main() {
     }
 
     while (true) {
+        // librtmp 的 RTMP_Read 函数会将 RTMP 数据包转换为 FLV 格式
         int nRead = RTMP_Read(rtmp, buf, bufsize);
         if (nRead <= 0) {
             printf("error !!!\n");
+            usleep(25 * 1000);
             continue;
         }
         for (int i = 0; i < bufsize; i++) {
