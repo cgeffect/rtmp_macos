@@ -1,9 +1,7 @@
-// FmpgVsRtmpPushDemo.cpp : 定义控制台应用程序的入口点。
-//
+/**
+ * 使用ffmpeg发送flv文件到服务器
+ */
 
-// #define _CRT_SECURE_NO_DEPRECATE
-
-// #include "stdafx.h"
 /// ffmpeg.c.api
 extern "C" {
 #include "libavformat/avformat.h"

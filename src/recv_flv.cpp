@@ -1,10 +1,9 @@
-// LibrtmpVS2015RecvStream.cpp : ??????????ó????????
-//
 
-//最简单的基于librtmp的示例：接收（RTMP保存为FLV）
-//                        
-//原文链接：https://blog.csdn.net/leixiaohua1020/article/details/42104893
+// 最简单的基于librtmp的示例：接收（RTMP保存为FLV）
+// 接收到的数据是完整的flv文件, 可以直接写入文件
+// 原文链接：https://blog.csdn.net/leixiaohua1020/article/details/42104893
 
+// https://zhuanlan.zhihu.com/p/649606730
 #include "rtmp.h"
 #include "log.h"
 #include <stdio.h>
@@ -26,6 +25,7 @@ static int InitSockets() {
     version = MAKEWORD(1, 1);
     return (WSAStartup(version, &wsaData) == 0);
 #endif
+    return 1;
 }
 
 static void CleanupSockets() {

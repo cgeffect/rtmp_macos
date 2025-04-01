@@ -1,4 +1,8 @@
 
+/**
+ * 使用librtmp发送264文件到服务器
+ */
+
 #include <stdio.h>
 #include "util/librtmp_send264.h"
 
