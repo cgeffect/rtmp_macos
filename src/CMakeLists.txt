@@ -77,9 +77,9 @@ add_executable(recv_flv ${CMAKE_CURRENT_SOURCE_DIR}/recv_flv.cpp)
 target_include_directories(recv_flv PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(recv_flv PRIVATE ${libs_trd_srv})
 
-add_executable(recv_264 ${CMAKE_CURRENT_SOURCE_DIR}/recv_264.cpp ${utils})
-target_include_directories(recv_264 PRIVATE ${libSRV_INCLUDES_DIR})
-target_link_libraries(recv_264 PRIVATE ${libs_trd_srv})
+add_executable(recv_264_aac ${CMAKE_CURRENT_SOURCE_DIR}/recv_264_aac.cpp ${utils})
+target_include_directories(recv_264_aac PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(recv_264_aac PRIVATE ${libs_trd_srv})
 
 add_executable(flv_pack ${CMAKE_CURRENT_SOURCE_DIR}/flv_pack.cpp)
 target_include_directories(flv_pack PRIVATE ${libSRV_INCLUDES_DIR})
