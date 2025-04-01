@@ -55,6 +55,12 @@ list(APPEND SYS_LIBS ${AUDIOTOOLBOX_FRAMEWORK})
 find_library(SECURITY_FRAMEWORK Security)
 list(APPEND SYS_LIBS ${SECURITY_FRAMEWORK})
 
+file(GLOB_RECURSE utils 
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/*.h 
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/*.cpp
+)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${utils})
+
 add_executable(send_flv_ff ${CMAKE_CURRENT_SOURCE_DIR}/send_flv_ff.cpp)
 target_include_directories(send_flv_ff PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(send_flv_ff PRIVATE ${libs_trd_srv} ${SYS_LIBS})
@@ -71,7 +77,7 @@ add_executable(recv_flv ${CMAKE_CURRENT_SOURCE_DIR}/recv_flv.cpp)
 target_include_directories(recv_flv PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(recv_flv PRIVATE ${libs_trd_srv})
 
-add_executable(recv_264 ${CMAKE_CURRENT_SOURCE_DIR}/recv_264.cpp)
+add_executable(recv_264 ${CMAKE_CURRENT_SOURCE_DIR}/recv_264.cpp ${utils})
 target_include_directories(recv_264 PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(recv_264 PRIVATE ${libs_trd_srv})
 

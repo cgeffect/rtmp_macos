@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include "util/adts.h"
 
 typedef unsigned char byte;
 typedef unsigned int uint;
@@ -15,6 +16,8 @@ typedef unsigned int uint;
 #define IDR_PIC_HEADER_SIZE 9
 #define SLICE_HEADER_SIZE 9
 #define NALU_START_CODE "\x00\x00\x00\x01"
+
+#define AAC_HEADER_SIZE = 2
 
 enum nal_unit_type_e
 {
@@ -53,15 +56,10 @@ static void CleanupSockets() {
     WSACleanup();
 #endif
 }
-
-/*
- int body_size = 13 + sps_len + 3 + pps_len;
- 17 00 00 00 00 01 42 c0 20 ff e1 00 16
- 67 42 c0 20 da 02 d0 28 68 40 00 00 03 00 40 00 00 0c a3 c6 0c a8
- 01 00 04
- 68 ce 0f c8
-
- */
+int sampleRate = -1;
+int profile = -1;
+int bitDepth = -1;
+int channels = -1;
 
 void printLog(uint8_t *data, int size) {
     for (int i = 0; i < size; i++) {
@@ -71,14 +69,14 @@ void printLog(uint8_t *data, int size) {
     printf("\n");
 }
 
-// 解析 rtmp packet 数据
-void parse_rtmp_packet_data(char *packet_data, int packet_data_size, FILE *h264fh) {
+// 解析 rtmp video packet 数据
+void parse_rtmp_video_packet_data(char *packet_data, int packet_data_size, FILE *h264fh) {
     // sps pps
     if (packet_data[0] == 0x17 && packet_data[1] == 0x00) {
         printf("nalu_type: sps pps\n");
         uint8_t *sps_header = (uint8_t *)malloc(SPS_HEADER_SIZE);
         memcpy(sps_header, packet_data, SPS_HEADER_SIZE);
-        printLog(sps_header, SPS_HEADER_SIZE);
+//        printLog(sps_header, SPS_HEADER_SIZE);
 
         // 取出最后两位, sps的长度
         int sps_data_size = (sps_header[SPS_HEADER_SIZE - 2] << 8) | sps_header[SPS_HEADER_SIZE - 1];
@@ -119,13 +117,13 @@ void parse_rtmp_packet_data(char *packet_data, int packet_data_size, FILE *h264f
         uint8_t *idr_header = (uint8_t *)malloc(IDR_PIC_HEADER_SIZE);
         memcpy(idr_header, packet_data, IDR_PIC_HEADER_SIZE);
         
-        printLog(idr_header, IDR_PIC_HEADER_SIZE);
+//        printLog(idr_header, IDR_PIC_HEADER_SIZE);
         // 去取出最后两位
         int nalu_data_size = (idr_header[IDR_PIC_HEADER_SIZE - 2] << 8) | idr_header[IDR_PIC_HEADER_SIZE - 1];
         printf("计算结果: %d %d\n", nalu_data_size, packet_data_size - IDR_PIC_HEADER_SIZE);
         uint8_t *nalu_data = (uint8_t *)malloc(nalu_data_size);
         memcpy(nalu_data, packet_data + IDR_PIC_HEADER_SIZE, nalu_data_size);
-        printLog(nalu_data, nalu_data_size);
+//        printLog(nalu_data, nalu_data_size);
         
         // 写入起始码 0x00000001
         fwrite(NALU_START_CODE, 1, 4, h264fh);
@@ -140,7 +138,7 @@ void parse_rtmp_packet_data(char *packet_data, int packet_data_size, FILE *h264f
         uint8_t *slice_header = (uint8_t *)malloc(SLICE_HEADER_SIZE);
         memcpy(slice_header, packet_data, SLICE_HEADER_SIZE);
         
-        printLog(slice_header, SLICE_HEADER_SIZE);
+//        printLog(slice_header, SLICE_HEADER_SIZE);
 
         // 去取出最后两位
         int slice_data_size = (slice_header[SLICE_HEADER_SIZE - 2] << 8) | slice_header[SLICE_HEADER_SIZE - 1];
@@ -148,7 +146,7 @@ void parse_rtmp_packet_data(char *packet_data, int packet_data_size, FILE *h264f
         uint8_t *slice_data = (uint8_t *)malloc(slice_data_size);
         memcpy(slice_data, packet_data + SLICE_HEADER_SIZE, slice_data_size);
         
-        printLog(slice_data, slice_data_size);
+//        printLog(slice_data, slice_data_size);
         
         // 写入起始码 0x00000001
         fwrite(NALU_START_CODE, 1, 4, h264fh);
@@ -162,6 +160,63 @@ void parse_rtmp_packet_data(char *packet_data, int packet_data_size, FILE *h264f
     fflush(h264fh);
 }
 
+// https://www.cnblogs.com/8335IT/p/18208384 RTMP解析音频AAC
+void parse_rtmp_audio_packet_data(char *packet_data, int packet_data_size, FILE *aacfh) {
+    // 头信息
+    if ((unsigned char)packet_data[0] == 0xAF && packet_data[1] == 0x0) {
+//        printLog((uint8_t *)packet_data, 4);
+        // 第一个字节
+        // AF 1010 1111
+        // 高前4位是编码器类型 & 0xF0 1111 0000
+        int format = packet_data[0] & 0xF0 >> 4;
+        if (format == 10) {
+            printf("音频数据格式值: AAC\n");
+        }
+        // 高5-6位 & 0x0C 0000 1100
+        int sampleRateVal = packet_data[0] & 0x0C >> 2;
+        if (sampleRateVal == 0) {
+            sampleRate = 5000;
+        } else if (sampleRateVal == 1) {
+            sampleRate = 11000;
+        } else if (sampleRateVal == 2) {
+            sampleRate = 22000;
+        } else if (sampleRateVal == 3) {
+            sampleRate = 44100;
+        }
+
+        // 采样位数
+        int bitDepthVal = packet_data[0] & 0x02 >> 1;
+        if (bitDepthVal == 0) {
+            bitDepth = 9;
+        } else if (bitDepthVal == 1) {
+            bitDepth = 16;
+        }
+        
+        // 声道数
+        int channelsVal = packet_data[0] & 0x01;
+        if (channelsVal == 0) {
+            channels = 1;
+        } else if (channelsVal == 1) {
+            channels = 2;
+        }
+        
+        // 3-4个字节, 参考get_adts_header里adts_header[2] = ((profile) << 6) + (freq_idx << 2) + (chanCfg >> 2); 第三个字节的高6位的值是(profile) << 6
+        profile = packet_data[2] & 0xFC >> 6;
+
+    } else if ((unsigned char)packet_data[0] == 0xAF && packet_data[1] == 0x01) {
+        // 数据
+        uint8_t aac_header[7];
+        get_adts_header(sampleRate, channels, profile, aac_header, packet_data_size - 2);
+        size_t len = fwrite(aac_header, 1, 7, aacfh);
+        printf("len: %zu\n", len);
+        
+        fwrite(packet_data + 2, 1, packet_data_size - 2, aacfh);
+    }
+    
+    fflush(aacfh);
+}
+
+// ffmpeg -re -i ./doc/source.flv -c copy -f flv -y rtmp://172.16.184.26:1935/live/livestream
 int main() {
     RTMP *pRTMP = nullptr; /// RTMP_Alloc()
     printf("hello, librtmp,version=%d\n", RTMP_LibVersion());
@@ -174,8 +229,15 @@ int main() {
     bool bLiveStream = true;
 
     char *outUrl = (char *)"rtmp://172.16.184.26:1935/live/test";
-    FILE *fp = fopen("/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/rtmp_recv.h264", "wb");
-    if (!fp) {
+    FILE *vfp = fopen("/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/rtmp_recv.h264", "wb");
+    if (!vfp) {
+        RTMP_LogPrintf("Open File Error.\n");
+        CleanupSockets();
+        return -1;
+    }
+
+    FILE *afp = fopen("/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/rtmp_recv.aac", "wb");
+    if (!afp) {
         RTMP_LogPrintf("Open File Error.\n");
         CleanupSockets();
         return -1;
@@ -213,30 +275,25 @@ int main() {
         CleanupSockets();
         return -1;
     }
-    int index = 0;
+
     RTMPPacket packet = {0};
     while (true) {
-//        if (index > 100) {
-//            break;
-//        }
-        index++;
         bool isReady = rtmp->m_bPlaying && RTMP_IsConnected(rtmp);
+        printf("isReady: %s\n", isReady ? "true" : "false");
         int size = RTMP_ReadPacket(rtmp, &packet);
+        // 一个消息可能被封装成多个块(Chunk)，只有当所有块读取完才处理这个消息包
+        if (!RTMPPacket_IsReady(&packet)) { //是否读取完毕
+            printf("not ready\n");
+            continue;
+        }
         if (isReady && size != 0) {
-//            if (RTMPPacket_IsReady(&packet)) {
-//                printf("ready\n");
-//            }
-            for (int i = 0; i < packet.m_nBodySize; i++) {
-                // 使用 %02hhx 格式说明符
-                printf("%02hhx ", (unsigned char)packet.m_body[i]);
-            }
-            printf("\n");
 
             if (packet.m_packetType == RTMP_PACKET_TYPE_VIDEO) {
                 printf("recv RTMP_PACKET_TYPE_VIDEO,size=%d\n", packet.m_nBodySize);
-                parse_rtmp_packet_data(packet.m_body, packet.m_nBodySize, fp);
+                parse_rtmp_video_packet_data(packet.m_body, packet.m_nBodySize, vfp);
             } else if (packet.m_packetType == RTMP_PACKET_TYPE_AUDIO) {
                 printf("recv RTMP_PACKET_TYPE_AUDIO ,size=%d\n", packet.m_nBodySize);
+                parse_rtmp_audio_packet_data(packet.m_body, packet.m_nBodySize, afp);
             } else if (packet.m_packetType == RTMP_PACKET_TYPE_INFO) {
                 printf("recv RTMP_PACKET_TYPE_INFO ,size=%d\n", packet.m_nBodySize);
             }
@@ -246,9 +303,9 @@ int main() {
         }
     }
 
-    if (fp) {
-        fclose(fp);
-    }
+    fclose(vfp);
+    fclose(afp);
+
     if (rtmp) {
         RTMP_Close(rtmp);
         RTMP_Free(rtmp);
