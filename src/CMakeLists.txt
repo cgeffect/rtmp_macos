@@ -66,7 +66,12 @@ file(GLOB_RECURSE libflv
     ${CMAKE_CURRENT_SOURCE_DIR}/libflv/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/libflv/*.c
 )
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${libflv})
+file(GLOB_RECURSE libmpeg 
+    ${CMAKE_CURRENT_SOURCE_DIR}/libmpeg/*.h 
+    ${CMAKE_CURRENT_SOURCE_DIR}/libmpeg/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/libmpeg/*.c
+)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${libflv} ${libmpeg})
 
 add_executable(send_flv_ff ${CMAKE_CURRENT_SOURCE_DIR}/send_flv_ff.cpp)
 target_include_directories(send_flv_ff PRIVATE ${libSRV_INCLUDES_DIR})
@@ -99,3 +104,7 @@ target_link_libraries(avc2flv PRIVATE ${libs_trd_srv})
 add_executable(flv2avc ${CMAKE_CURRENT_SOURCE_DIR}/flv2avc.cpp ${libflv})
 target_include_directories(flv2avc PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(flv2avc PRIVATE ${libs_trd_srv})
+
+add_executable(flv2ts ${CMAKE_CURRENT_SOURCE_DIR}/flv2ts.cpp ${libflv} ${libmpeg})
+target_include_directories(flv2ts PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(flv2ts PRIVATE ${libs_trd_srv})
