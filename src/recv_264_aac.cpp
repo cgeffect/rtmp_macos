@@ -315,3 +315,6 @@ int main() {
     getchar();
     return 0;
 }
+
+// RTMP解析音频AAC
+// https://www.cnblogs.com/8335IT/p/18208384
