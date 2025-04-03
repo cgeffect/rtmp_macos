@@ -19,13 +19,30 @@ typedef struct {
     int height;
 } flv_metadata_t;
 
+// 读取 AMF 字符串
+int amf_get_string(const unsigned char **ptr, char *str, int max_len) {
+    uint16_t length = (*ptr)[0] << 8 | (*ptr)[1];
+    *ptr += 2 + length;
+    if (length >= max_len) {
+        return -1;
+    }
+    memcpy(str, *ptr - length, length);
+    str[length] = '\0';
+    return 0;
+}
+
 // 解析 IEEE-754 双精度浮点数
-double parse_double(const unsigned char *data) {
+double parse_double(const unsigned char *hex_data) {
     union {
         double d;
         unsigned char bytes[8];
     } u;
-    memcpy(u.bytes, data, 8);
+
+    // 确保字节序正确（小端）
+    for (int i = 0; i < 8; i++) {
+        u.bytes[i] = hex_data[7 - i];
+    }
+
     return u.d;
 }
 
