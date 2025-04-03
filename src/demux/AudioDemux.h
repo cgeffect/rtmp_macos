@@ -26,7 +26,7 @@ public:
         return aac_channel_;
     }
     int32_t GetSampleRate() const;
-    const std::string &AACSeqHeaer() const;
+    const std::string &AACSeqHeader() const;
 
 private:
     int32_t DemuxAAC(const char *data, size_t size, std::list<SampleBuf> &list);

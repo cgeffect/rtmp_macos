@@ -19,6 +19,7 @@
 #include "libflv/amf0.h"
 #include "demux/VideoDemux.h"
 #include "demux/AudioDemux.h"
+#include "util/adts.h"
 
 using namespace tmms::mm;
 void printLog(uint8_t *body, int body_length) {
@@ -49,36 +50,32 @@ char *hex_to_string(unsigned char *hex_data, int length) {
 }
 int main() {
     FILE *ifh = fopen("/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/768x320.flv", "rb");
-    if (ifh == NULL) {
-        printf("Failed to open files!");
-        return -1;
-    }
-
     FILE *h264fh = fopen("/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/flv_unpack.h264", "wb");
-    if (h264fh == NULL) {
+    FILE *aacfh = fopen("/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/flv_unpack.aac", "wb");
+    if (ifh == NULL || h264fh == NULL || aacfh == NULL) {
         printf("Failed to open output file!");
         return -1;
     }
 
+    bool has_sps_pps = false;
     VideoDemux vDemux;
     AudioDemux aDemux;
     uint32_t sz;
     uint8_t data[FLV_HEADER_SIZE];
     struct flv_header_t flv_header;
 
-    if (FLV_HEADER_SIZE != fread(data, 1, FLV_HEADER_SIZE, ifh))
+    if (FLV_HEADER_SIZE != fread(data, 1, FLV_HEADER_SIZE, ifh)) {
         return -1;
-
-    if (FLV_HEADER_SIZE != flv_header_read(&flv_header, data, FLV_HEADER_SIZE))
+    }
+    if (FLV_HEADER_SIZE != flv_header_read(&flv_header, data, FLV_HEADER_SIZE)) {
         return -1;
-
+    }
     assert(flv_header.offset >= FLV_HEADER_SIZE && flv_header.offset < FLV_HEADER_SIZE + 4096);
     int offset = (int)(flv_header.offset - FLV_HEADER_SIZE);
     for (int n = offset; n > 0 && n < 4096; n -= sizeof(data)) {
         size_t size = n >= sizeof(data) ? sizeof(data) : n;
         uint8_t data[size];
         fread(data, 1, size, ifh);
-        //        flv->read(flv->param, data, n >= sizeof(data) ? sizeof(data) : n); // skip
     }
 
     while (true) {
@@ -113,7 +110,19 @@ int main() {
             std::list<SampleBuf> outs = {};
             aDemux.OnDemux(data, body_length, outs);
             printf("%zu\n", n);
-
+            
+            if (outs.size() > 0) {
+                for (auto &frame : outs) {
+                    // audioObjectType 和 ADTS 帧头部的 profile 之间的关系是：profile = audioObjectType - 1。
+                    // 这种关系是由于 ADTS 帧头部的 profile 字段只有 2 位，而 audioObjectType 字段有 5 位，标准中采用了这种映射方式
+                    AacProfile profile = (AacProfile)(aDemux.GetObjectType() - 1);
+                    uint8_t aac_header[7];
+                    get_adts_header(aDemux.GetSampleRate(), aDemux.GetChannel(), profile, aac_header, (int)frame.size);
+                    size_t len = fwrite(aac_header, 1, 7, aacfh);
+                    printf("len: %zu\n", len);
+                    fwrite(frame.addr, 1, frame.size, aacfh);
+                }
+            }
         } else if (tag_header.type == VIDEODATA) {
             uint8_t video_tag_body[tag_header.size];
             size_t body_length = sizeof(video_tag_body);
@@ -128,6 +137,27 @@ int main() {
             const char *data = reinterpret_cast<const char *>(video_tag_body); // 显式类型转换
             std::list<SampleBuf> outs = {};
             vDemux.OnDemux(data, body_length, outs);
+            if (vDemux.HasSpsPps() && has_sps_pps == false) {
+                // 写入起始码 0x00000001
+                fwrite("\x00\x00\x00\x01", 1, 4, h264fh);
+                // 写入恢复的NALU头
+                fwrite(vDemux.GetSPS().data(), 1, vDemux.GetSPS().size(), h264fh);
+                
+                // 写入起始码 0x00000001
+                fwrite("\x00\x00\x00\x01", 1, 4, h264fh);
+                // 写入恢复的NALU头
+                fwrite(vDemux.GetPPS().data(), 1, vDemux.GetPPS().size(), h264fh);
+                has_sps_pps = true;
+            }
+            
+            if (outs.size() > 0) {
+                for (auto &frame : outs) {
+                    // 写入起始码 0x00000001
+                    fwrite("\x00\x00\x00\x01", 1, 4, h264fh);
+                    // 写入恢复的NALU头
+                    fwrite(frame.addr, 1, frame.size, h264fh);
+                }
+            }
             printf("%zu\n", n);
         } else if (tag_header.type == SCRIPTDATAOBJECT) {
             uint8_t flv_tag_body[tag_header.size];

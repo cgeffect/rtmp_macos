@@ -109,7 +109,7 @@ add_executable(flv2avc-aac ${CMAKE_CURRENT_SOURCE_DIR}/flv2avc-aac.cpp ${libflv}
 target_include_directories(flv2avc-aac PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(flv2avc-aac PRIVATE ${libs_trd_srv})
 
-add_executable(flv2avc-aac-manual ${CMAKE_CURRENT_SOURCE_DIR}/flv2avc-aac-manual.cpp ${libflv} ${demux})
+add_executable(flv2avc-aac-manual ${CMAKE_CURRENT_SOURCE_DIR}/flv2avc-aac-manual.cpp ${CMAKE_CURRENT_SOURCE_DIR}/util/adts.h ${libflv} ${demux})
 target_include_directories(flv2avc-aac-manual PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(flv2avc-aac-manual PRIVATE ${libs_trd_srv})
 

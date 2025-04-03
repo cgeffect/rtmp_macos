@@ -31,14 +31,19 @@ int32_t AudioDemux::OnDemux(const char *data, size_t size, std::list<SampleBuf> 
     }
     return -1;
 }
-int32_t AudioDemux::DemuxAAC(const char *data, size_t size, std::list<SampleBuf> &list) {
-    AACPacketType type = (AACPacketType)data[1];
 
+//https://blog.csdn.net/u014552102/article/details/143202232?spm=1001.2014.3001.5502
+//AudioSpecificConfig
+int32_t AudioDemux::DemuxAAC(const char *data, size_t size, std::list<SampleBuf> &list) {
+    // 值为0表示该AudioTag包含AAC sequence header，即包含audioObjectType属性为AAC格式时的AudioSpecificConfig
+    // 值为1表示该AudioTag包含一帧AAC音频压缩数据。
+    AACPacketType type = (AACPacketType)data[1];
     if (type == kAACPacketTypeAACSequenceHeader) {
         if (size - 2 > 0) {
+            // aac_seq_header_存储的是AudioSpecificConfig
             aac_seq_header_.clear();
             aac_seq_header_.assign(data + 2, size - 2);
-            return DemuxAACSequenceHeader(data + 2, size - 2);
+            return DemuxAACSequenceHeader(data + 2, (int)(size - 2));
         }
     } else if (type == kAACPacketTypeAACRaw) {
         if (!aac_ok_) {
@@ -74,6 +79,6 @@ int32_t AudioDemux::GetSampleRate() const {
     return aac_sample_rates[aac_sample_rate_];
 }
 
-const std::string &AudioDemux::AACSeqHeaer() const {
+const std::string &AudioDemux::AACSeqHeader() const {
     return aac_seq_header_;
 }

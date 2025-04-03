@@ -83,6 +83,9 @@ int32_t VideoDemux::DecodeAVCNaluAnnexb(const char *data, size_t size, std::list
     }
     return ret;
 }
+
+//https://blog.csdn.net/u014552102/article/details/142860940?spm=1001.2014.3001.5501
+//如果是avcc格式sps, pps 存储在 AVCDecoderConfigurationRecord里面
 int32_t VideoDemux::DecodeAVCNaluIAvcc(const char *data, size_t size, std::list<SampleBuf> &outs) {
     while (size > 1) {
         uint32_t nalu_size = 0;
@@ -169,6 +172,7 @@ int32_t VideoDemux::DecodeAVCSeqHeader(const char *data, size_t size, std::list<
         return -1;
     }
     pps_.assign(data + 3, pps_length);
+    has_sps_pps_ = true;
     return 0;
 }
 int32_t VideoDemux::DecodeAvcNalu(const char *data, size_t size, std::list<SampleBuf> &outs) {
