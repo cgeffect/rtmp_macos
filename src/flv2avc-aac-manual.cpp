@@ -20,6 +20,7 @@
 #include "demux/VideoDemux.h"
 #include "demux/AudioDemux.h"
 #include "util/adts.h"
+#include "demux/amf/AMFObject.h"
 
 using namespace tmms::mm;
 void printLog(uint8_t *body, int body_length) {
@@ -167,11 +168,17 @@ int main() {
                 printf("SCRIPTDATAOBJECT error\n");
                 return 0;
             }
-            for (int i = 0; i < body_length; i++) {
-                // 使用 %02hhx 格式说明符
-                printf("%02x ", flv_tag_body[i]);
-            }
-            printf("\n");
+
+            const char *data = reinterpret_cast<const char *>(flv_tag_body); // 显式类型转换
+            tmms::mm::AMFObject amfObj;
+            amfObj.Decode(data, body_length);
+            amfObj.Dump();
+
+//            for (int i = 0; i < body_length; i++) {
+//                // 使用 %02hhx 格式说明符
+//                printf("%02x ", flv_tag_body[i]);
+//            }
+//            printf("\n");
 
             int offset = 0;
             while (true) {
@@ -181,12 +188,12 @@ int main() {
                 printLog(flv_tag_body + offset, 3);
                 printf("offset: %d\n", offset);
                 int type = flv_tag_body[offset];
-                if (type == 2) {
+                if (type == AMF_STRING) {
                     int length = flv_tag_body[offset + 1] << 8 | flv_tag_body[offset + 2];
                     offset += 2;
                     char buffer[64] = {0};
                     char *str = hex_to_string(&flv_tag_body[offset + 1], length);
-                    printf("%s\n", str);
+                    printf("AMF_STRING: %s\n", str);
                     offset += (1 + length);
                 } else if (type == 8) {
                     int length = flv_tag_body[offset + 1] << 24 | flv_tag_body[offset + 2] << 16 | flv_tag_body[offset + 3] << 8 | flv_tag_body[offset + 4];
@@ -204,7 +211,6 @@ int main() {
                         int key_length = flv_tag_body[offset + 1] << 8 | flv_tag_body[offset + 2];
                         offset += 2;
                         char *str = hex_to_string(&flv_tag_body[offset + 1], key_length);
-                        printf("%s: ", str);
                         offset += (1 + key_length);
                         // printLog(flv_tag_body + offset, 1);
                         int valType = flv_tag_body[offset];
@@ -215,19 +221,19 @@ int main() {
                             // printLog(data, 8);
                             double value = parse_double(data);
                             offset += 8;
-                            printf("%f\n", value);
+                            printf("AMF_NUMBER: %s: %f\n", str, value);
                         } else if (valType == AMF_BOOLEAN) {
                             uint8_t data[1];
                             memcpy(data, flv_tag_body + (offset + 1), 1);
                             int value = data[0];
                             offset += 1;
-                            printf("%d\n", value);
+                            printf("AMF_BOOLEAN: %s: %d\n", str, value);
                         } else if (valType == AMF_STRING) {
                             int length = flv_tag_body[offset + 1] << 8 | flv_tag_body[offset + 2];
                             offset += 2;
                             char buffer[64] = {0};
-                            char *str = hex_to_string(&flv_tag_body[offset + 1], length);
-                            printf("%s\n", str);
+                            char *val = hex_to_string(&flv_tag_body[offset + 1], length);
+                            printf("AMF_STRING: %s: %s\n", str, val);
                             offset += length;
                         }
                     }

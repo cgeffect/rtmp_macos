@@ -16,6 +16,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(libSRV_TRD_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty)
 list(APPEND libSRV_INCLUDES_DIR ./)
+list(APPEND libSRV_INCLUDES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/demux)
+
 list(APPEND libSRV_INCLUDES_DIR ${libSRV_TRD_ROOT_PATH}/faac/deploy/include)
 list(APPEND libSRV_INCLUDES_DIR ${libSRV_TRD_ROOT_PATH}/fdk-aac/deploy/include)
 list(APPEND libSRV_INCLUDES_DIR ${libSRV_TRD_ROOT_PATH}/librtmp/deploy/include)
