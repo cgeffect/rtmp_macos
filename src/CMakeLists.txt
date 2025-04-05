@@ -122,3 +122,11 @@ target_link_libraries(flv2ts PRIVATE ${libs_trd_srv})
 add_executable(flv2ps ${CMAKE_CURRENT_SOURCE_DIR}/flv2ps.cpp ${libflv} ${libmpeg})
 target_include_directories(flv2ps PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(flv2ps PRIVATE ${libs_trd_srv})
+
+add_executable(parse_ps ${HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/parse_ps.cpp)
+target_include_directories(parse_ps PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(parse_ps PRIVATE ${libs_trd_srv})
+
+add_executable(parse_ts ${HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/parse_ts.cpp)
+target_include_directories(parse_ts PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(parse_ts PRIVATE ${libs_trd_srv})
