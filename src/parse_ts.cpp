@@ -1,5 +1,5 @@
-// // https://cloud.tencent.com/developer/article/2021489
-
+// https://cloud.tencent.com/developer/article/2021489
+// https://www.cnblogs.com/rongmiao/p/18194911
 #include <stdio.h>
 
 #include <stdlib.h>
@@ -149,7 +149,7 @@ int parse_TS(unsigned char *buffer, int FileSize) {
     // transport_priority             1
     // PID                            13
     while (temp < buffer + FileSize) {
-        // 第二个字节的后5位, 加上第三个字节8位共同构成pid
+        // 第二个字节的后5位, 加上第三个字节8位共同构成pid, 值为0表示PAT
         pat_pid = (temp[1] & 0x1f) << 8 | temp[2];
 
         if (pat_pid != 0) {

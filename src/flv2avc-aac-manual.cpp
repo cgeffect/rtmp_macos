@@ -195,7 +195,7 @@ int main() {
                     char *str = hex_to_string(&flv_tag_body[offset + 1], length);
                     printf("AMF_STRING: %s\n", str);
                     offset += (1 + length);
-                } else if (type == 8) {
+                } else if (type == AMF_ECMA_ARRAY) {
                     int length = flv_tag_body[offset + 1] << 24 | flv_tag_body[offset + 2] << 16 | flv_tag_body[offset + 3] << 8 | flv_tag_body[offset + 4];
                     offset += 4;
 

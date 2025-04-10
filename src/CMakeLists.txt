@@ -130,3 +130,15 @@ target_link_libraries(parse_ps PRIVATE ${libs_trd_srv})
 add_executable(parse_ts ${HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/parse_ts.cpp)
 target_include_directories(parse_ts PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(parse_ts PRIVATE ${libs_trd_srv})
+
+add_executable(parse-ts ${HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/parse-ts.cpp)
+target_include_directories(parse-ts PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(parse-ts PRIVATE ${libs_trd_srv})
+
+add_executable(demux_fmp4 ${HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/demux_fmp4.cpp)
+target_include_directories(demux_fmp4 PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(demux_fmp4 PRIVATE ${libs_trd_srv})
+
+add_executable(demux_mp4 ${HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/demux_mp4.cpp)
+target_include_directories(demux_mp4 PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(demux_mp4 PRIVATE ${libs_trd_srv})
