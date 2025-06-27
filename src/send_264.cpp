@@ -20,7 +20,7 @@ int read_buffer1(unsigned char *buf, int buf_size) {
 }
 
 int main(int argc, char *argv[]) {
-    char *inUrl = (char *)"/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/test2.h264";
+    char *inUrl = (char *)"/Users/jason/Jason/webrtc/native-rtc/rtmp_macos/res/test2.h264";
     // 输出的地址
     char *outUrl = (char *)"rtmp://172.16.184.26:1935/live/test";
 

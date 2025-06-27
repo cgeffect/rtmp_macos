@@ -1,3 +1,4 @@
+// 有问题
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -20,7 +21,7 @@ struct MP4FileHeader {
     char fileType[4];
     uint32_t fileSize;
     char fileType2[4];
-}
+};
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {

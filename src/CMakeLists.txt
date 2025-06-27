@@ -91,6 +91,10 @@ add_executable(send_264 ${CMAKE_CURRENT_SOURCE_DIR}/send_264.cpp ${CMAKE_CURRENT
 target_include_directories(send_264 PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(send_264 PRIVATE ${libs_trd_srv})
 
+add_executable(send_aac ${CMAKE_CURRENT_SOURCE_DIR}/send_aac.cpp)
+target_include_directories(send_aac PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(send_aac PRIVATE ${libs_trd_srv})
+
 add_executable(recv_flv ${CMAKE_CURRENT_SOURCE_DIR}/recv_flv.cpp)
 target_include_directories(recv_flv PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(recv_flv PRIVATE ${libs_trd_srv})
@@ -142,3 +146,7 @@ target_link_libraries(demux_fmp4 PRIVATE ${libs_trd_srv})
 add_executable(demux_mp4 ${HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/demux_mp4.cpp)
 target_include_directories(demux_mp4 PRIVATE ${libSRV_INCLUDES_DIR})
 target_link_libraries(demux_mp4 PRIVATE ${libs_trd_srv})
+
+add_executable(h264_to_fmp4 ${CMAKE_CURRENT_SOURCE_DIR}/h264_to_fmp4.cpp)
+target_include_directories(h264_to_fmp4 PRIVATE ${libSRV_INCLUDES_DIR})
+target_link_libraries(h264_to_fmp4 PRIVATE ${libs_trd_srv} ${SYS_LIBS})
