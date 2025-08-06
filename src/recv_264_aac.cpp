@@ -1,4 +1,4 @@
-// 使用librtmp接受flv的video tag
+// 使用librtmp接收flv文件的avc和aac
 #include "rtmp.h"
 #include "log.h"
 #include <stdio.h>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26.1)
-message("--begin rtcapp complie---")
+message("--begin rtmp-demo complie---")
 
 project(rtmp_macos)
 
